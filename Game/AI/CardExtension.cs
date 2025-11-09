@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using WindBot.Game.AI.Enums;
 using YGOSharp.OCGWrapper.Enums;
 
