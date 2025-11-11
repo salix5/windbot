@@ -36,7 +36,7 @@ namespace WindBot
                 // Join the host specified on the command line.
                 if (args.Length == 0)
                 {
-                    Logger.WriteErrorLine("=== WARN ===");
+                    Logger.WriteErrorLine("=== WARNING ===");
                     Logger.WriteLine("No input found, tring to connect to localhost YGOPro host.");
                     Logger.WriteLine("If it fail, the program will quit sliently.");
                 }
@@ -90,8 +90,8 @@ namespace WindBot
                 MainServer.AuthenticationSchemes = AuthenticationSchemes.Anonymous;
                 MainServer.Prefixes.Add("http://+:" + ServerPort + "/");
                 MainServer.Start();
-                Logger.WriteLine("WindBot server start successed.");
-                Logger.WriteLine("HTTP GET http://127.0.0.1:" + ServerPort + "/?name=WindBot&host=127.0.0.1&port=7911 to call the bot.");
+                Logger.WriteLine("WindBot server start succeeded.");
+                Logger.WriteLine($"HTTP GET http://127.0.0.1:{ServerPort}/?name=WindBot&host=127.0.0.1&port=7911 to call the bot.");
                 while (true)
                 {
 #if !DEBUG
