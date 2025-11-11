@@ -51,16 +51,15 @@ namespace YGOSharp.OCGWrapper
             return (Type & (long)type) != 0;
         }
 
-        public bool HasSetcode(int setcode)
+        public bool HasSetcode(int value)
         {
-            long setcodes = Setcode;
-            int settype = setcode & 0xfff;
-            int setsubtype = setcode & 0xf000;
-            while (setcodes > 0)
+            int settype = value & 0x0fff;
+            int setsubtype = value & 0xf000;
+            for (int i = 0; i < 4; i++)
             {
-                long check_setcode = setcodes & 0xffff;
-                setcodes >>= 16;
-                if ((check_setcode & 0xfff) == settype && (check_setcode & 0xf000 & setsubtype) == setsubtype) return true;
+                long section = (Setcode >> (i * 16)) & 0xffffL;
+                if ((section & 0x0fff) == settype && (section & setsubtype) == setsubtype)
+                    return true;
             }
             return false;
         }
