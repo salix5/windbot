@@ -1,6 +1,6 @@
 namespace YGOSharp.OCGWrapper.Enums
 {
-    public enum CardType
+    public enum CardType : long
     {
         Monster = 0x1,
         Spell = 0x2,

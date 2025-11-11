@@ -1,6 +1,6 @@
 namespace YGOSharp.OCGWrapper.Enums
 {
-    public enum CardAttribute
+    public enum CardAttribute : long
     {
         Earth = 0x01,
         Water = 0x02,
