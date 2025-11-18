@@ -1,6 +1,6 @@
 # WindBot
 
-A C# bot for [YGOPro](https://github.com/Fluorohydride/ygopro), compatible with the [YGOSharp](https://github.com/IceYGO/ygosharp) and [SRVPro](https://github.com/mycard/srvpro) server.
+A C# bot for [YGOPro](https://github.com/salix5/ygopro), compatible with [YGOSharp](https://github.com/IceYGO/ygosharp) and [SRVPro](https://github.com/mycard/srvpro) server.
 
 ### How to use:
 
@@ -21,12 +21,12 @@ The nickname for the bot.
 The deck to be used by the bot. Available decks are listed below. Keep empty to use random deck.
 
 `DeckFile`  
-The deck file (.ydk) to be used by the bot. Will be set by `Deck` automatically, but you can override it.
+The deck file (.ydk) to be used by the bot. It will be set by `Deck` automatically, but you can override it.
 
 Note: Most cards not in the original deck are unknown to the bot, and won't be summoned or activated in the duel.
 
 `Dialog`  
-The dialog texts to be used by the bot. See Dialogs folder for list.
+The dialog texts to be used by the bot. See Dialogs folder for the list.
 
 `Host`  
 The IP of the host to be connected to.
@@ -38,19 +38,19 @@ The port of the host to be connected to.
 The host info (password) to be used.
 
 `Version`  
-The version of YGOPro.
+The PRO_VERSION of YGOPro.
 
 `Hand`  
-If you are testing deck, you may want to make sure the bot go first or second. `Hand=1` will make the bot always show Scissors, 2 for Rock, 3 for Paper.
+If you are testing a deck, you may want to make sure the bot go first or second. `Hand=1` will make the bot always show Scissors, 2 for Rock, 3 for Paper.
 
-`Chat`
-False to turn the chat of bot off.
+`Chat`  
+Set to false to turn off the chat of bot.
 
-`Debug`
-Print verbose log of card movement info. False at default. (May be updated in future)
+`Debug`  
+Print verbose log of card moving info. False by default (may be updated in future).
 
 `ServerMode` and `ServerPort`  
-WindBot can run as a "server", provide a http interface to create bot.
+WindBot can be run as a server, provide a http interface to create bots.
 
 ### Available decks
 
