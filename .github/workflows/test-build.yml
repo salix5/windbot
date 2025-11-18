@@ -38,7 +38,7 @@ jobs:
         xcopy /e /y bin\Release dist\WindBot\
         xcopy /y BotWrapper\bin\Release\bot.conf dist\
         xcopy /y BotWrapper\bin\Release\bot.exe dist\
-        tar -C dist -acf WindBot.zip .
+        tar -C dist -cf WindBot.zip --format=zip *
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
