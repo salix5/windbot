@@ -38,14 +38,12 @@ jobs:
         xcopy /e /y bin\Release dist\WindBot\
         xcopy /y BotWrapper\bin\Release\bot.conf dist\
         xcopy /y BotWrapper\bin\Release\bot.exe dist\
-        cd dist
-        7z a WindBot.7z *
-        cd ..
+        tar -C dist -acf WindBot.zip .
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
-        path: dist\WindBot.7z
+        path: WindBot.zip
 
     - name: GitHub Release
       if: github.event_name == 'push'
@@ -56,4 +54,4 @@ jobs:
         prerelease: false
         title: "Development Build"
         files: |
-          dist/WindBot.7z
+          WindBot.zip
