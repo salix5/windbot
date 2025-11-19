@@ -44,13 +44,3 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         path: WindBot.tar.gz
-
-    - name: GitHub Release
-      if: github.event_name == 'push'
-      uses: marvinpinto/action-automatic-releases@latest
-      with:
-        repo_token: "${{ secrets.GITHUB_TOKEN }}"
-        prerelease: false
-        title: "Development Build"
-        files: |
-          WindBot.tar.gz
