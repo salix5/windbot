@@ -6,9 +6,13 @@ concurrency:
 
 on:
   push:
-    branches: [ "master" ]
+    branches:
+      - 'master'
+    tags:
+      - '*'
   pull_request:
-    branches: [ "master" ]
+    branches:
+      - 'master'
 
 jobs:
   build:
@@ -41,6 +45,16 @@ jobs:
         tar -C dist -czvf WindBot.tar.gz *
 
     - name: Upload build artifacts
+      if: startsWith(github.ref, 'refs/tags/')
       uses: actions/upload-artifact@v4
       with:
         path: WindBot.tar.gz
+  
+    - name: GitHub Release
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: salix5/action-automatic-releases@75f1a65738686fd56793b41982fd0ed01cc8e96c
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        prerelease: false
+        files: |
+          WindBot.tar.gz
