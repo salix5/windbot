@@ -31,7 +31,7 @@ jobs:
       uses: microsoft/setup-msbuild@v2
 
     - name: Restore NuGet packages
-      run: nuget restore WindBot.sln
+      run: nuget restore $env:Solution_Name
 
     - name: Build
       run: msbuild $env:Solution_Name /t:Build /p:Configuration=Release
