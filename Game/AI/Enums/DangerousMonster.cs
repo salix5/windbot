@@ -26,6 +26,9 @@ namespace WindBot.Game.AI.Enums
         DaigustoSphreeze = 29552709,
         OhimetheManifestedMikanko = 81260679,
         ArahimetheManifestedMikanko = 75771170,
-        YubelDasEwigLiebeWachter = 47172959
+        YubelDasEwigLiebeWachter = 47172959,
+        UzuhimeTheManifestedMikanko = 57566760,
+        MaidenInLove = 8445808,
+        ArchfiendMatador = 7622360
     }
 }

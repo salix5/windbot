@@ -17,6 +17,7 @@ namespace WindBot.Game.AI.Enums
         BorrelendDragon = 98630720,
         DrytronMeteonisDraconids = 69815951,
         MyutantBeast = 34695290,
-        VeidosTheDragonOfEndlessDarkness = 8540986
+        VeidosTheDragonOfEndlessDarkness = 8540986,
+        FirstOfTheDragonlords = 53466722
     }
 }
