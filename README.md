@@ -41,7 +41,7 @@ The host info (password) to be used.
 The PRO_VERSION of YGOPro.
 
 `Hand`  
-If you are testing a deck, you may want to make sure the bot go first or second. `Hand=1` will make the bot always show Scissors, 2 for Rock, 3 for Paper.
+Sometimes you may want to make sure the bot go first or second. Make the bot always select fixed card, 1 for Scissors, 2 for Rock, 3 for Paper.
 
 `Chat`  
 Set to false to turn off the chat of bot.
