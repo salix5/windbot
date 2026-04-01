@@ -48,4 +48,4 @@ jobs:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         TAG_NAME: ${{ github.ref_name }}
       run: |
-        gh release create "$TAG_NAME" WindBot.tar.gz --title "$TAG_NAME" --generate-notes
+        gh release create $env:TAG_NAME WindBot.tar.gz --title $env:TAG_NAME --generate-notes
