@@ -42,12 +42,6 @@ jobs:
         xcopy /y BotWrapper\bin\Release\bot.exe dist\
         tar -C dist -czvf WindBot.tar.gz *
 
-    - name: Upload build artifacts
-      if: startsWith(github.ref, 'refs/tags/')
-      uses: actions/upload-artifact@v6
-      with:
-        path: WindBot.tar.gz
-  
     - name: GitHub Release
       if: startsWith(github.ref, 'refs/tags/')
       uses: salix5/action-automatic-releases@e0545bc14e9677f38aa573f1a52563022f987356
