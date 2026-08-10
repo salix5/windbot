@@ -52,3 +52,18 @@ jobs:
         TAG_NAME: "${{ github.ref_name }}"
       run: |
         gh release create $env:TAG_NAME WindBot.tar.gz --title $env:TAG_NAME --generate-notes
+
+  mono-build:
+    runs-on: ubuntu-latest
+    container:
+      image: mono:6.8.0.123
+
+    env:
+      Solution_Name: WindBot.sln
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v6
+
+    - name: Build with Mono MSBuild
+      run: msbuild "$Solution_Name" /t:Build /p:Configuration=Release /p:Platform=x86
