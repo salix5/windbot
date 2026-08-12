@@ -216,15 +216,6 @@ namespace WindBot.Game.AI.Decks
         }
         public override int OnSelectPlace(int cardId, int player, CardLocation location, int available)
         {
-            if (cardId == 0 && player == 1)
-            {
-                int zone = 0;
-                for (int i = 4; i >= 0; --i)
-                {
-                    zone = (int)System.Math.Pow(2, i);
-                    if ((available & zone) > 0) return zone;
-                }
-            }
             if (cardId == CardId.GalaxyTomahawk)
             {
                 if ((available & Zones.z5) > 0) return Zones.z5;
@@ -232,6 +223,27 @@ namespace WindBot.Game.AI.Decks
             }
             return base.OnSelectPlace(cardId, player, location, available);
         }
+
+        public override uint OnSelectDisfield(int hint, int count, uint available)
+        {
+            ClientCard currentChainCard = Duel.GetCurrentChainCard();
+            if (currentChainCard != null && currentChainCard.Controller == 0
+                && currentChainCard.IsCode(CardId.KashtiraShangriIra) && count == 1)
+            {
+                for (int i = 4; i >= 0; --i)
+                {
+                    uint zone = 1u << (16 + i);
+                    if ((available & zone) != 0) return zone;
+                }
+                for (int i = 4; i >= 0; --i)
+                {
+                    uint zone = 1u << (24 + i);
+                    if ((available & zone) != 0) return zone;
+                }
+            }
+            return base.OnSelectDisfield(hint, count, available);
+        }
+
         public override IList<ClientCard> OnSelectCard(IList<ClientCard> cards, int min, int max, int hint, bool cancelable)
         {
             if (cards.Any(card => card != null && card.Location == CardLocation.Extra
@@ -554,14 +566,7 @@ namespace WindBot.Game.AI.Decks
         public int SelectSTPlace(ClientCard card = null, bool avoid_Impermanence = false)
         {
             List<int> list = new List<int> { 0, 1, 2, 3, 4 };
-            int n = list.Count;
-            while (n-- > 1)
-            {
-                int index = Program.Rand.Next(n + 1);
-                int temp = list[index];
-                list[index] = list[n];
-                list[n] = temp;
-            }
+            Util.ShuffleListInPlace(list);
             foreach (int seq in list)
             {
                 int zone = (int)System.Math.Pow(2, seq);

@@ -25,7 +25,7 @@ namespace WindBot.Game
         {
         }
 
-        public void Init(int deck, int extra)
+        public void Init(int deck, int extra, int player)
         {
             Hand = new List<ClientCard>();
             MonsterZone = new ClientCard[7];
@@ -37,9 +37,19 @@ namespace WindBot.Game
             HintDescriptions = new HashSet<int>();
 
             for (int i = 0; i < deck; ++i)
-                Deck.Add(new ClientCard(0, CardLocation.Deck, -1));
+            {
+                ClientCard card = new ClientCard(0, CardLocation.Deck, i, (int)CardPosition.FaceDownDefence);
+                card.Owner = player;
+                card.Controller = player;
+                Deck.Add(card);
+            }
             for (int i = 0; i < extra; ++i)
-                ExtraDeck.Add(new ClientCard(0, CardLocation.Extra, -1));
+            {
+                ClientCard card = new ClientCard(0, CardLocation.Extra, i, (int)CardPosition.FaceDownDefence);
+                card.Owner = player;
+                card.Controller = player;
+                ExtraDeck.Add(card);
+            }
         }
 
         public int GetMonstersExtraZoneCount()
@@ -206,9 +216,9 @@ namespace WindBot.Game
             return HasInCards(ExtraDeck, cardId);
         }
 
-        public bool HasAttackingMonster()
+        public bool HasAttackingMonster(bool strict = false)
         {
-            return GetMonsters().Any(card => card.IsAttack());
+            return GetMonsters().Any(card => card.IsAttack() || (!strict && card.IsMonsterAttackWhileInDefPos()));
         }
 
         public bool HasDefendingMonster()
