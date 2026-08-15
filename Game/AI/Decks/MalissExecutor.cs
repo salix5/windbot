@@ -447,7 +447,6 @@ namespace WindBot.Game.AI.Decks
                             queenChoices,
                             new[] { (int)Zones.z2, (int)Zones.z1, (int)Zones.z3, (int)Zones.z0, (int)Zones.z4 }
                         );
-                        AI.SelectPlace(pick);
                         return pick;
                     }
                 }
@@ -489,7 +488,6 @@ namespace WindBot.Game.AI.Decks
                             {
                                 pick = FirstBitFromOrder(linkedEmzChoices, new[] { EMZ_L, EMZ_R });
                             }
-                            AI.SelectPlace(pick);
                             return pick;
                         }
                         if (emzAvail != 0)
@@ -516,7 +514,6 @@ namespace WindBot.Game.AI.Decks
                                 pick = FirstBitFromOrder(emzAvail, new[] { EMZ_L, EMZ_R });
                             }
 
-                            AI.SelectPlace(pick);
                             return pick;
                         }
                         if (linkedChoices != 0)
@@ -525,7 +522,6 @@ namespace WindBot.Game.AI.Decks
                                 linkedChoices,
                                 new[] { (int)Zones.z2, (int)Zones.z1, (int)Zones.z3, (int)Zones.z0, (int)Zones.z4 }
                             );
-                            AI.SelectPlace(pick);
                             return pick;
                         }
                     }
@@ -533,7 +529,6 @@ namespace WindBot.Game.AI.Decks
                     if (emzOnly != 0)
                     {
                         int pick = FirstBitFromOrder(emzOnly, new[] { EMZ_L, EMZ_R });
-                        AI.SelectPlace(pick);
                         return pick;
                     }
                     return PreferSafeSummonZones(available);
@@ -565,7 +560,6 @@ namespace WindBot.Game.AI.Decks
                     if (choices != 0)
                     {
                         int pick = FirstBitFromOrder(choices, new[] { (int)Zones.z1, (int)Zones.z3 });
-                        AI.SelectPlace(pick);
                         _rrSelfSSPlacing = false;
                         return pick;
                     }
@@ -578,7 +572,6 @@ namespace WindBot.Game.AI.Decks
                     if (safe != 0)
                     {
                         int pick = FirstBitFromOrder(safe, new[] { (int)Zones.z2, (int)Zones.z1, (int)Zones.z3, (int)Zones.z0, (int)Zones.z4 });
-                        AI.SelectPlace(pick);
                         return pick;
                     }
                 }
@@ -596,7 +589,6 @@ namespace WindBot.Game.AI.Decks
                     if (choices != 0)
                     {
                         int pick = FirstBitFromOrder(choices, new[] { (int)Zones.z1, (int)Zones.z3 });
-                        AI.SelectPlace(pick);
                         return pick;
                     }
                 }
@@ -620,10 +612,8 @@ namespace WindBot.Game.AI.Decks
                 else
                     choose = LowestBit(available & 0x1F);
 
-                AI.SelectPlace(choose);
                 return choose;
             }
-            SelectSTPlace(Card, true);
             return base.OnSelectPlace(cardId, player, location, available);
         }
 
@@ -938,19 +928,14 @@ namespace WindBot.Game.AI.Decks
             if (DefaultCheckWhetherCardIsNegated(Card)) return true;
             if (isMonster && (toFieldCheck || Card.Location == CardLocation.MonsterZone))
             {
-                if ((toFieldCheck && (((int)type & (int)CardType.Link) != 0)) || Card.IsDefense())
+                if ((toFieldCheck && (((int)type & (int)CardType.Link) == 0)) || Card.IsDefense())
                 {
-                    if (Enemy.MonsterZone.Any(card => CheckNumber41(card)) || Bot.MonsterZone.Any(card => CheckNumber41(card))) return true;
+                    if (DefaultCheckWhetherNumber41IsActive()) return true;
                 }
                 if (Enemy.HasInSpellZone(CardId.SkillDrain, true)) return true;
             }
             if (disablecheck) return (Card.Location == CardLocation.MonsterZone || Card.Location == CardLocation.SpellZone) && Card.IsDisabled() && Card.IsFaceup();
             return false;
-        }
-
-        public bool CheckNumber41(ClientCard card)
-        {
-            return card != null && card.IsFaceup() && card.IsCode(CardId.Number41BagooskatheTerriblyTiredTapir) && card.IsDefense() && !card.IsDisabled();
         }
 
         public void SelectSTPlace(ClientCard card = null, bool avoidImpermanence = false, List<int> avoidList = null)
@@ -1275,6 +1260,7 @@ namespace WindBot.Game.AI.Decks
                 if (Duel.IsCurrentSolvingChainNegated())
                     splashNegatedThisTurn = true;
             }
+            base.OnChainSolved(chainIndex);
         }
         public override void OnChainEnd()
         {

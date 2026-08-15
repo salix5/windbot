@@ -6133,8 +6133,7 @@ namespace WindBot.Game.AI.Decks
 
             return !HasSmallPumpkingOnField()
                 && !pumpkingSummonEffectAttempted
-                && Bot.Graveyard.Any(c => c != Card
-                    && c.IsCode(CardId.PumpkingTheKingOfGraveGhosts)
+                && Bot.Graveyard.Any(c => c.IsCode(CardId.PumpkingTheKingOfGraveGhosts)
                     && c.IsCanRevive());
         }
 
@@ -8146,7 +8145,7 @@ namespace WindBot.Game.AI.Decks
                 case CardId.EldlichTheMadGoldenLord:
                     if (hint == HintMsg.Release)
                     {
-                        List<ClientCard> tribute = cards.Where(c => c.Controller == 0 && IsZombie(c) && c != Card)
+                        List<ClientCard> tribute = cards.Where(c => c.Controller == 0 && IsZombie(c) && !c.IsCode(CardId.EldlichTheMadGoldenLord))
                             .OrderBy(GetMaterialValue).ToList();
                         return Util.CheckSelectCount(tribute, cards, min, max);
                     }
@@ -8412,23 +8411,6 @@ namespace WindBot.Game.AI.Decks
             }
 
             return base.OnSelectOption(options);
-        }
-
-        public override bool OnSelectBattleReplay()
-        {
-            ClientCard attacker = Bot.BattlingMonster;
-            if (attacker != null
-                && attacker.Controller == 0
-                && attacker.Location == CardLocation.MonsterZone
-                && attacker.IsFaceup()
-                && attacker.IsCode(CardId.Varudras)
-                && Enemy.GetMonsterCount() == 0)
-            {
-                DebugRoute("ACCEPT Battle Replay: Varudras continues as direct attack");
-                return true;
-            }
-
-            return base.OnSelectBattleReplay();
         }
 
         public override bool OnSelectYesNo(int desc)

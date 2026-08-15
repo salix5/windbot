@@ -245,6 +245,7 @@ namespace WindBot.Game.AI.Decks
                     }
                 }
             }
+            base.OnChainSolved(chainIndex);
         }
 
         // new turn reset
@@ -586,7 +587,7 @@ namespace WindBot.Game.AI.Decks
                 {
                     if (Bot.HasInGraveyard(cardid) && !ActivatedCards.Contains(cardid))
                     {
-                        spells_id.Add(Card.Id);
+                        spells_id.Add(cardid);
                     }
                 }
             }

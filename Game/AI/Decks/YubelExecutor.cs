@@ -299,40 +299,19 @@ namespace WindBot.Game.AI.Decks
                 int choose = (prefer != 0) ? LowestBit(prefer)
                                            : LowestBit(available & 0x1F); // fallback
 
-                AI.SelectPlace(choose);
                 return choose;
             }
-            SelectSTPlace(Card, true);
             return base.OnSelectPlace(cardId, player, location, available);
         }
 
         public override CardPosition OnSelectPosition(int cardId, IList<CardPosition> positions)
         {
-            if (positions == null || positions.Count == 0)
-                return base.OnSelectPosition(cardId, positions);
+            bool isYubelFamily = YUBEL_SET.Contains(cardId);
 
-            bool isYubelFamily =
-                YUBEL_SET.Contains(cardId) ||
-                (Card != null && YUBEL_SET.Contains(Card.Id)) ||
-                (Card != null && (Card.Name?.Contains("Yubel") ?? false));
+            if (isYubelFamily && positions.Contains(CardPosition.FaceUpAttack))
+                return CardPosition.FaceUpAttack;
 
-            if(!isYubelFamily)
-                return base.OnSelectPosition(cardId, positions);
-
-            CardPosition atkPref =
-                positions.Contains(CardPosition.FaceUpAttack) ? CardPosition.FaceUpAttack :
-                positions.Contains(CardPosition.Attack) ? CardPosition.Attack :
-                (CardPosition)0;
-
-            if (isYubelFamily && atkPref != 0)
-            {
-                AI.SelectPosition(atkPref);
-                return atkPref;
-            }
-
-            var chosen = positions[0];
-            AI.SelectPosition(chosen);
-            return chosen;
+            return base.OnSelectPosition(cardId, positions);
         }
 
         public bool AshBlossomActivate()
@@ -616,19 +595,14 @@ namespace WindBot.Game.AI.Decks
             if (DefaultCheckWhetherCardIsNegated(Card)) return true;
             if (isMonster && (toFieldCheck || Card.Location == CardLocation.MonsterZone))
             {
-                if ((toFieldCheck && (((int)type & (int)CardType.Link) != 0)) || Card.IsDefense())
+                if ((toFieldCheck && (((int)type & (int)CardType.Link) == 0)) || Card.IsDefense())
                 {
-                    if (Enemy.MonsterZone.Any(card => CheckNumber41(card)) || Bot.MonsterZone.Any(card => CheckNumber41(card))) return true;
+                    if (DefaultCheckWhetherNumber41IsActive()) return true;
                 }
                 if (Enemy.HasInSpellZone(CardId.SkillDrain, true)) return true;
             }
             if (disablecheck) return (Card.Location == CardLocation.MonsterZone || Card.Location == CardLocation.SpellZone) && Card.IsDisabled() && Card.IsFaceup();
             return false;
-        }
-
-        public bool CheckNumber41(ClientCard card)
-        {
-            return card != null && card.IsFaceup() && card.IsCode(CardId.Number41BagooskatheTerriblyTiredTapir) && card.IsDefense() && !card.IsDisabled();
         }
 
         public void SelectSTPlace(ClientCard card = null, bool avoidImpermanence = false, List<int> avoidList = null)
@@ -928,6 +902,7 @@ namespace WindBot.Game.AI.Decks
                     }
                 }
             }
+            base.OnChainSolved(chainIndex);
         }
         public override void OnChainEnd()
         {
@@ -2405,7 +2380,7 @@ namespace WindBot.Game.AI.Decks
             var solving = Duel.GetCurrentSolvingChainInfo();
             if (solving != null)
             {
-                Logger.DebugWriteLine($"  -> Solving: {CardStr(solving.RelatedCard)}  ActivateDescription={ActivateDescription}");
+                Logger.DebugWriteLine($"  -> Solving: {CardStr(solving.RelatedCard)}  ActivateDescription={solving.ActivateDescription}");
             }
             if (Duel.ChainTargets != null && Duel.ChainTargets.Count > 0)
             {

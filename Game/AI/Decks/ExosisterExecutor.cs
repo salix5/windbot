@@ -551,8 +551,7 @@ namespace WindBot.Game.AI.Decks
             }
             if (Card.IsMonster() && Card.Location == CardLocation.MonsterZone && Card.IsDefense())
             {
-                if (Enemy.MonsterZone.GetFirstMatchingFaceupCard(card => card.IsCode(CardId.Number41BagooskatheTerriblyTiredTapir) && card.IsDefense() && !card.IsDisabled()) != null
-                    || Bot.MonsterZone.GetFirstMatchingFaceupCard(card => card.IsCode(CardId.Number41BagooskatheTerriblyTiredTapir) && card.IsDefense() && !card.IsDisabled()) != null)
+                if (DefaultCheckWhetherNumber41IsActive())
                 {
                     return true;
                 }
@@ -744,6 +743,7 @@ namespace WindBot.Game.AI.Decks
                     }
                 }
             }
+            base.OnChainSolved(chainIndex);
         }
 
 
@@ -808,6 +808,7 @@ namespace WindBot.Game.AI.Decks
             oncePerTurnEffectActivatedList.Clear();
             activatedMagnificaList.Clear();
             spSummonThisTurn.Clear();
+            base.OnNewTurn();
         }
 
         /// <summary>

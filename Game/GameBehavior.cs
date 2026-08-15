@@ -923,6 +923,7 @@ namespace WindBot.Game
             _duel.Fields[attackcard.Controller].BattlingMonster = attackcard;
             _duel.Fields[1 - attackcard.Controller].BattlingMonster = defendcard;
             _duel.Fields[1 - attackcard.Controller].UnderAttack = true;
+            _ai.OnAttack();
 
             if (ld == 0 && ca != 0)
             {
@@ -1787,6 +1788,8 @@ namespace WindBot.Game
             int reply;
             if (desc == 30)
                 reply = _ai.OnSelectBattleReplay() ? 1 : 0;
+            else if (desc == 31)
+                reply = _ai.OnSelectBattleDirectAttack() ? 1 : 0;
             else
                 reply = _ai.OnSelectYesNo(desc) ? 1 : 0;
             Connection.Send(CtosMessage.Response, reply);
@@ -2113,6 +2116,7 @@ namespace WindBot.Game
             ClientCard card = _duel.GetCard(currentControler, (CardLocation)currentLocation, currentSequence);
             _duel.SummoningCards.Add(card);
             _duel.LastSummonPlayer = currentControler;
+            _ai.OnSpSummoning();
         }
 
         private void OnSpSummoned(BinaryReader packet)
