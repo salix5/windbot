@@ -8,11 +8,15 @@
 .vs/
 .vscode/
 
+WindBot.exe
+cards.cdb
+.log.*
+mono_crash.*.json
+
 # Build results
 
 [Dd]ebug/
 [Rr]elease/
-x64/
 build/
 [Bb]in/
 [Oo]bj/
