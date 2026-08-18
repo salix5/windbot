@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Data;
-using Mono.Data.Sqlite;
+using System.Data.SQLite;
 
 namespace YGOSharp.OCGWrapper
 {
@@ -12,11 +12,11 @@ namespace YGOSharp.OCGWrapper
         {
             _cards = new Dictionary<int, Card>();
 
-            using (SqliteConnection connection = new SqliteConnection("Data Source=" + databaseFullPath))
+            using (SQLiteConnection connection = new SQLiteConnection("Data Source=" + databaseFullPath))
             {
                 connection.Open();
 
-                using (IDbCommand command = new SqliteCommand("SELECT id, ot, alias, setcode, type, level, race, attribute, atk, def FROM datas", connection))
+                using (IDbCommand command = new SQLiteCommand("SELECT id, ot, alias, setcode, type, level, race, attribute, atk, def FROM datas", connection))
                 {
                     using (IDataReader reader = command.ExecuteReader())
                     {
