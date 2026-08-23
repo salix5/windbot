@@ -1,6 +1,6 @@
 # WindBot
 
-WindBot is a C# duel bot for [YGOPro](https://github.com/Fluorohydride/ygopro). It is compatible with [YGOSharp](https://github.com/IceYGO/ygosharp) and [SRVPro](https://github.com/mycard/srvpro) servers.
+WindBot is a C# duel bot for [YGOPro](https://github.com/salix5/ygopro). It is compatible with [YGOSharp](https://github.com/IceYGO/ygosharp) and [SRVPro](https://github.com/mycard/srvpro) servers.
 
 ## Usage
 
