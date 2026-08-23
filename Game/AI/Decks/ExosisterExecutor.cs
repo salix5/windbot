@@ -158,8 +158,6 @@ namespace WindBot.Game.AI.Decks
         List<int> ExosisterSpellTrapList = new List<int>{CardId.ExosisterPax, CardId.ExosisterArment, CardId.ExosisterVadis, CardId.ExosisterReturnia};
 
         List<int> currentNegatingIdList = new List<int>();
-        bool enemyActivateMaxxC = false;
-        bool enemyActivateLockBird = false;
         bool enemyMoveGrave = false;
         bool paxCallToField = false;
         List<int> infiniteImpermanenceList = new List<int>();
@@ -175,9 +173,7 @@ namespace WindBot.Game.AI.Decks
         bool kaspitellEffect1Activated = false;
         bool kaspitellEffect3Activated = false;
         bool gibrineEffect1Activated = false;
-        bool gibrineEffect3Activated = false;
         bool asophielEffect1Activated = false;
-        bool asophielEffect3Activated = false;
         bool sakitamaEffect1Activated = false;
         List<int> exosisterTransformEffectList = new List<int>();
         List<int> oncePerTurnEffectActivatedList = new List<int>();
@@ -435,11 +431,20 @@ namespace WindBot.Game.AI.Decks
         /// </summary>
         public bool CheckLessOperation()
         {
-            if (!enemyActivateMaxxC)
-            {
-                return false;
-            }
-            return CheckAtAdvantage();
+            return CheckAtAdvantage()
+                && enemyResolvedEffectIdList.Contains(_CardId.MaxxC)
+                && DefaultCheckWhetherEnemyCanDraw();
+        }
+
+        public bool CheckLessOperation(CardLocation loc)
+        {
+            if (CheckLessOperation()) return true;
+            if (!DefaultCheckWhetherEnemyCanDraw()) return false;
+            if (enemyResolvedEffectIdList.Contains(_CardId.MulcharmyPurulia) && (loc & CardLocation.Hand) != 0) return true;
+            if (enemyResolvedEffectIdList.Contains(_CardId.MulcharmyFuwalos) && (loc & (CardLocation.Deck | CardLocation.Extra)) != 0) return true;
+            if (enemyResolvedEffectIdList.Contains(_CardId.MulcharmyNyalus) && (loc & (CardLocation.Grave | CardLocation.Removed)) != 0) return true;
+
+            return false;
         }
 
         /// <summary>
@@ -676,14 +681,6 @@ namespace WindBot.Game.AI.Decks
 
             if (player == 1)
             {
-                if (card.IsCode(_CardId.MaxxC) && CheckCalledbytheGrave(_CardId.MaxxC) == 0)
-                {
-                    enemyActivateMaxxC = true;
-                }
-                if (card.IsCode(_CardId.LockBird) && CheckCalledbytheGrave(_CardId.LockBird) == 0)
-                {
-                    enemyActivateLockBird = true;
-                }
                 if (card.IsCode(_CardId.InfiniteImpermanence))
                 {
                     for (int i = 0; i < 5; ++i)
@@ -727,10 +724,6 @@ namespace WindBot.Game.AI.Decks
             ChainInfo currentChain = Duel.GetCurrentSolvingChainInfo();
             if (currentChain != null && !Duel.IsCurrentSolvingChainNegated() && currentChain.ActivatePlayer == 1)
             {
-                if (currentChain.IsActivateCode(_CardId.MaxxC))
-                    enemyActivateMaxxC = true;
-                if (currentChain.IsActivateCode(_CardId.LockBird))
-                    enemyActivateLockBird = true;
                 if (currentChain.IsActivateCode(_CardId.InfiniteImpermanence))
                 {
                     for (int i = 0; i < 5; ++i)
@@ -784,8 +777,6 @@ namespace WindBot.Game.AI.Decks
 
         public override void OnNewTurn()
         {
-            enemyActivateMaxxC = false;
-            enemyActivateLockBird = false;
             infiniteImpermanenceList.Clear();
             currentNegatingIdList.Clear();
 
@@ -800,9 +791,7 @@ namespace WindBot.Game.AI.Decks
             kaspitellEffect1Activated = false;
             kaspitellEffect3Activated = false;
             gibrineEffect1Activated = false;
-            gibrineEffect3Activated = false;
             asophielEffect1Activated = false;
-            asophielEffect3Activated = false;
             sakitamaEffect1Activated = false;
             exosisterTransformEffectList.Clear();
             oncePerTurnEffectActivatedList.Clear();
@@ -1432,7 +1421,7 @@ namespace WindBot.Game.AI.Decks
                 }
 
                 // summon for summon donner
-                if (!CheckLessOperation() && Bot.HasInExtra(CardId.DonnerDaggerFurHire) &&
+                if (!CheckLessOperation(CardLocation.Hand) && Bot.HasInExtra(CardId.DonnerDaggerFurHire) &&
                     !Bot.HasInHand(CardId.ExosisterMartha) || Bot.HasInHandOrInSpellZone(CardId.ExosisterReturnia))
                 {
                     List<ClientCard> illegalList = Bot.GetMonsters().Where(card => card.IsFaceup() && !card.HasType(CardType.Xyz) && card.Level != 4
@@ -1529,7 +1518,7 @@ namespace WindBot.Game.AI.Decks
 
             bool ableToXyz = Bot.GetMonsters().Count(card => CheckAbleForXyz(card)) >= 2;
 
-            if (CheckLessOperation() && ableToXyz)
+            if (CheckLessOperation(CardLocation.Hand) && ableToXyz)
             {
                 return false;
             }
@@ -1595,7 +1584,7 @@ namespace WindBot.Game.AI.Decks
             if (ActivateDescription != Util.GetStringId(CardId.ExosisterMartha, 0)) {
                 return false;
             }
-            if (CheckLessOperation() && Bot.GetMonsterCount() > 0)
+            if (CheckLessOperation(CardLocation.Hand | CardLocation.Deck) && Bot.GetMonsterCount() > 0)
             {
                 return false;
             }
@@ -1841,7 +1830,6 @@ namespace WindBot.Game.AI.Decks
             {
                 return false;
             }
-            gibrineEffect3Activated = true;
             SelectDetachMaterial(Card);
             return true;
         }
@@ -1867,7 +1855,6 @@ namespace WindBot.Game.AI.Decks
             ClientCard targetCard = Util.GetProblematicEnemyMonster(0, true);
             if (targetCard != null)
             {
-                asophielEffect3Activated = true;
                 SelectDetachMaterial(Card);
                 AI.SelectNextCard(targetCard);
                 return true;
@@ -2032,7 +2019,7 @@ namespace WindBot.Game.AI.Decks
                     // try to search stella
                     if (Bot.Hand.Count(card => card.IsCode(CardId.ExosisterStella)) == 0 && Bot.HasInDeck(CardId.ExosisterStella))
                     {
-                        bool shouldSpSummon = !CheckLessOperation() && summoned && Bot.HasInMonstersZoneOrInGraveyard(CardId.ExosisterElis);
+                        bool shouldSpSummon = !CheckLessOperation(CardLocation.Hand) && summoned && Bot.HasInMonstersZoneOrInGraveyard(CardId.ExosisterElis);
                         if (Bot.Hand.Any(card => card?.Data != null && card.IsMonster() && card.HasSetcode(SetcodeExosister)))
                         {
                             if (!(Card.Location == CardLocation.SpellZone))
@@ -2070,7 +2057,7 @@ namespace WindBot.Game.AI.Decks
                 }
 
                 // addition summon
-                if (Bot.GetMonsters().Count(card => CheckAbleForXyz(card)) == 1 && summoned && !CheckLessOperation())
+                if (Bot.GetMonsters().Count(card => CheckAbleForXyz(card)) == 1 && summoned && !CheckLessOperation(CardLocation.Hand))
                 {
                     if (    (sakitamaEffect1Activated || !Bot.HasInHand(CardId.Sakitama))
                         &&  (stellaEffect1Activated   || !Bot.HasInMonstersZone(CardId.ExosisterStella))
@@ -2199,7 +2186,7 @@ namespace WindBot.Game.AI.Decks
                 bool decided = false;
 
                 // addition summon
-                if (Bot.GetMonsters().Count(card => CheckAbleForXyz(card)) == 1 && summoned && !CheckLessOperation())
+                if (Bot.GetMonsters().Count(card => CheckAbleForXyz(card)) == 1 && summoned && !CheckLessOperation(CardLocation.Extra))
                 {
                     if (    (sakitamaEffect1Activated || !Bot.HasInHand(CardId.Sakitama))
                         &&  (stellaEffect1Activated   || !Bot.HasInMonstersZone(CardId.ExosisterStella))
@@ -2341,7 +2328,7 @@ namespace WindBot.Game.AI.Decks
             bool checkTransform = false;
 
             // special summon for xyz
-            if (Duel.Player == 0 && Duel.Phase > DuelPhase.Draw && !CheckLessOperation())
+            if (Duel.Player == 0 && Duel.Phase > DuelPhase.Draw && !CheckLessOperation(CardLocation.Deck))
             {
                 decideToActivate = true;
             }
@@ -2460,7 +2447,7 @@ namespace WindBot.Game.AI.Decks
             {
                 return false;
             }
-            if (enemyActivateLockBird && CheckAtAdvantage())
+            if (!DefaultCheckWhetherBotCanSearch() && CheckAtAdvantage())
             {
                 return false;
             }
@@ -2494,11 +2481,11 @@ namespace WindBot.Game.AI.Decks
         /// </summary>
         public bool ExosisterStellaSummonCheck()
         {
-            if (stellaEffect1Activated || Bot.HasInMonstersZone(CardId.ExosisterStella, true) || CheckWhetherNegated(true) || CheckLessOperation())
+            if (stellaEffect1Activated || Bot.HasInMonstersZone(CardId.ExosisterStella, true) || CheckWhetherNegated(true) || CheckLessOperation(CardLocation.Hand))
             {
                 return false;
             }
-            if (enemyActivateLockBird && CheckAtAdvantage())
+            if (!DefaultCheckWhetherBotCanSearch() && CheckAtAdvantage())
             {
                 return false;
             }
@@ -2519,12 +2506,12 @@ namespace WindBot.Game.AI.Decks
         /// </summary>
         public bool ExosisterIreneSummonCheck()
         {
-            if (irenaEffect1Activated || CheckLessOperation()
+            if (irenaEffect1Activated || CheckLessOperation(CardLocation.Hand)
                 || CheckWhetherNegated(true) || CheckCalledbytheGrave(CardId.ExosisterElis) > 0 || CheckCalledbytheGrave(CardId.ExosisterIrene) > 0)
             {
                 return false;
             }
-            if (enemyActivateLockBird && CheckAtAdvantage())
+            if (!DefaultCheckWhetherBotCanDraw() && CheckAtAdvantage())
             {
                 return false;
             }
@@ -2542,7 +2529,7 @@ namespace WindBot.Game.AI.Decks
         /// </summary>
         public bool ExosisterForElisSummonCheck()
         {
-            if (elisEffect1Activated || CheckCalledbytheGrave(CardId.ExosisterElis) > 0 || CheckLessOperation())
+            if (elisEffect1Activated || CheckCalledbytheGrave(CardId.ExosisterElis) > 0 || CheckLessOperation(CardLocation.Hand))
             {
                 return false;
             }
@@ -2554,7 +2541,7 @@ namespace WindBot.Game.AI.Decks
             {
                 return false;
             }
-            if (enemyActivateLockBird && CheckAtAdvantage())
+            if (!DefaultCheckWhetherBotCanSearch() && CheckAtAdvantage())
             {
                 return false;
             }
@@ -2574,7 +2561,7 @@ namespace WindBot.Game.AI.Decks
             {
                 return false;
             }
-            if (enemyActivateLockBird && CheckAtAdvantage())
+            if (!DefaultCheckWhetherBotCanSearch() && CheckAtAdvantage())
             {
                 return false;
             }
@@ -2588,7 +2575,7 @@ namespace WindBot.Game.AI.Decks
 
         public bool ForSakitamaSummonCheck()
         {
-            if (sakitamaEffect1Activated || CheckCalledbytheGrave(CardId.Sakitama) > 0 || CheckLessOperation())
+            if (sakitamaEffect1Activated || CheckCalledbytheGrave(CardId.Sakitama) > 0 || CheckLessOperation(CardLocation.Hand))
             {
                 return false;
             }
@@ -2596,7 +2583,7 @@ namespace WindBot.Game.AI.Decks
             {
                 return false;
             }
-            if (enemyActivateLockBird && CheckAtAdvantage())
+            if (!DefaultCheckWhetherBotCanSearch() && CheckAtAdvantage())
             {
                 return false;
             }
@@ -2629,7 +2616,7 @@ namespace WindBot.Game.AI.Decks
             {
                 return false;
             }
-            if (CheckLessOperation())
+            if (CheckLessOperation(CardLocation.Extra))
             {
                 return false;
             }
@@ -2697,7 +2684,7 @@ namespace WindBot.Game.AI.Decks
 
         public bool ExosisterMikailisAdvancedSpSummonCheck()
         {
-            if (!CheckLessOperation() || enemyActivateLockBird)
+            if (!CheckLessOperation() || !DefaultCheckWhetherBotCanSearch())
             {
                 return false;
             }
@@ -2707,13 +2694,13 @@ namespace WindBot.Game.AI.Decks
 
         public bool ExosisterMikailisSpSummonCheckInner(bool shouldCheckLessOperation = true)
         {
-            if (Bot.HasInMonstersZone(CardId.ExosisterMikailis) || mikailisEffect3Activated || (CheckLessOperation() && shouldCheckLessOperation))
+            if (Bot.HasInMonstersZone(CardId.ExosisterMikailis) || mikailisEffect3Activated || (CheckLessOperation(CardLocation.Extra) && shouldCheckLessOperation))
             {
                 return false;
             }
 
             // check searched spell/trap
-            if (!enemyActivateLockBird)
+            if (DefaultCheckWhetherBotCanSearch())
             {
                 foreach (int cardId in ExosisterSpellTrapList)
                 {
@@ -2750,7 +2737,7 @@ namespace WindBot.Game.AI.Decks
 
         public bool ExosisterKaspitellAdvancedSpSummonCheck()
         {
-            if (!CheckLessOperation() || enemyActivateLockBird)
+            if (!CheckLessOperation() || !DefaultCheckWhetherBotCanSearch())
             {
                 return false;
             }
@@ -2759,7 +2746,7 @@ namespace WindBot.Game.AI.Decks
 
         public bool ExosisterKaspitellSpSummonCheckInner(bool shouldCheckLessOperation = true)
         {
-            if (Bot.HasInMonstersZone(CardId.ExosisterKaspitell) || kaspitellEffect3Activated || (shouldCheckLessOperation && CheckLessOperation()))
+            if (Bot.HasInMonstersZone(CardId.ExosisterKaspitell) || kaspitellEffect3Activated || (shouldCheckLessOperation && CheckLessOperation(CardLocation.Extra)))
             {
                 return false;
             }
@@ -2786,7 +2773,7 @@ namespace WindBot.Game.AI.Decks
             {
                 forMagnifica = true;
             }
-            if (enemyActivateLockBird)
+            if (!DefaultCheckWhetherBotCanSearch())
             {
                 searchMartha = false;
                 searchStella = false;
@@ -2810,7 +2797,7 @@ namespace WindBot.Game.AI.Decks
 
         public bool ExosistersMagnificaSpSummonCheck()
         {
-            if (CheckLessOperation())
+            if (CheckLessOperation(CardLocation.Extra))
             {
                 return false;
             }
@@ -2863,7 +2850,7 @@ namespace WindBot.Game.AI.Decks
                 return false;
             }
 
-            if (CheckLessOperation())
+            if (CheckLessOperation(CardLocation.Extra))
             {
                 return false;
             }

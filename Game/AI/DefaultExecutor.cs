@@ -1019,14 +1019,24 @@ namespace WindBot.Game.AI
         /// </summary>
         protected bool DefaultDisableMonster()
         {
+            ClientCard target = DefaultGetDisableMonsterTarget();
+            if (target == null)
+                return false;
+
+            AI.SelectCard(target);
+            return true;
+        }
+
+        /// <summary>
+        /// Return the enemy monster that should be disabled by the default logic.
+        /// </summary>
+        protected ClientCard DefaultGetDisableMonsterTarget()
+        {
             if (Duel.Player == 1)
             {
                 ClientCard target = Enemy.MonsterZone.GetShouldBeDisabledBeforeItUseEffectMonster();
                 if (target != null)
-                {
-                    AI.SelectCard(target);
-                    return true;
-                }
+                    return target;
             }
 
             ClientCard LastChainCard = Util.GetLastChainCard();
@@ -1034,27 +1044,26 @@ namespace WindBot.Game.AI
             if (LastChainCard != null && LastChainCard.Controller == 1 && LastChainCard.Location == CardLocation.MonsterZone &&
                 !LastChainCard.IsDisabled() && !LastChainCard.IsShouldNotBeTarget() && !LastChainCard.IsShouldNotBeSpellTrapTarget())
             {
-                AI.SelectCard(LastChainCard);
-                return true;
+                return LastChainCard;
             }
 
             if (Bot.BattlingMonster != null && Enemy.BattlingMonster != null)
             {
                 if (!Enemy.BattlingMonster.IsDisabled() && Enemy.BattlingMonster.IsCode(_CardId.EaterOfMillions))
                 {
-                    AI.SelectCard(Enemy.BattlingMonster);
-                    return true;
+                    return Enemy.BattlingMonster;
                 }
             }
 
-            if (Duel.Phase == DuelPhase.BattleStart && Duel.Player == 1 &&
-                Enemy.HasInMonstersZone(_CardId.NumberS39UtopiaTheLightning, true))
+            if (Duel.Phase == DuelPhase.BattleStart && Duel.Player == 1)
             {
-                AI.SelectCard(_CardId.NumberS39UtopiaTheLightning);
-                return true;
+                ClientCard target = Enemy.MonsterZone.GetFirstMatchingCard(card =>
+                    card.IsCode(_CardId.NumberS39UtopiaTheLightning) && !card.IsDisabled());
+                if (target != null)
+                    return target;
             }
 
-            return false;
+            return null;
         }
 
         /// <summary>
@@ -1952,7 +1961,7 @@ namespace WindBot.Game.AI
             if (Bot.HasInMonstersZone(_CardId.ThunderKingRaiOh, notDisabled: true, faceUp: true)
                 || Enemy.HasInMonstersZone(_CardId.ThunderKingRaiOh, notDisabled: true, faceUp: true))
                 return false;
-            if (Enemy.HasInMonstersZone(_CardId.ThunderDragonColossus))
+            if (Enemy.HasInMonstersZone(_CardId.ThunderDragonColossus, notDisabled: true, faceUp: true))
                 return false;
             if (Bot.HasInSpellZone(_CardId.DeckLockdown, notDisabled: true, faceUp: true)
                 || Enemy.HasInSpellZone(_CardId.DeckLockdown, notDisabled: true, faceUp: true)
@@ -1960,6 +1969,17 @@ namespace WindBot.Game.AI
                 || Enemy.HasInSpellZone(_CardId.Mistake, notDisabled: true, faceUp: true))
                 return false;
             if (Enemy.HasInSpellZone(_CardId.DoomZDestruction, notDisabled: true, faceUp: true))
+                return false;
+            return true;
+        }
+
+        /// <summary>
+        /// Check whether bot can draw cards.
+        /// </summary>
+        /// <returns></returns>
+        protected bool DefaultCheckWhetherBotCanDraw()
+        {
+            if (resolvedEffectIdList.Contains(_CardId.LockBird))
                 return false;
             return true;
         }

@@ -174,11 +174,6 @@ namespace WindBot.Game.AI.Decks
 
         int maxSummonCount = 1;
         int summonCount = 1;
-        bool enemyActivateMaxxC = false;
-        bool enemyActivatePurulia = false;
-        bool enemyActivateFuwalos = false;
-        bool enemyActivateNyalus = false;
-        bool lockBirdSolved = false;
         int dimensionShifterCount = 0;
         bool botActivateMulcharmy = false;
         bool botSolvingCross = false;
@@ -352,7 +347,8 @@ namespace WindBot.Game.AI.Decks
 
         public bool CheckShouldNoMoreSpSummon()
         {
-            if (CheckAtAdvantage() && enemyActivateMaxxC && !lockBirdSolved && (Duel.Turn == 1 || Duel.Phase >= DuelPhase.Main2))
+            if (CheckAtAdvantage() && enemyResolvedEffectIdList.Contains(_CardId.MaxxC) && DefaultCheckWhetherEnemyCanDraw()
+                && (Duel.Turn == 1 || Duel.Phase >= DuelPhase.Main2))
             {
                 return true;
             }
@@ -362,10 +358,10 @@ namespace WindBot.Game.AI.Decks
         public bool CheckShouldNoMoreSpSummon(CardLocation loc)
         {
             if (CheckShouldNoMoreSpSummon()) return true;
-            if (lockBirdSolved || (Duel.Turn > 1 && Duel.Phase < DuelPhase.Main2)) return false;
-            if (enemyActivatePurulia && (loc & CardLocation.Hand) != 0) return true;
-            if (enemyActivateFuwalos && (loc & (CardLocation.Deck | CardLocation.Extra)) != 0) return true;
-            if (enemyActivateNyalus && (loc & (CardLocation.Grave | CardLocation.Removed)) != 0) return true;
+            if (!DefaultCheckWhetherEnemyCanDraw() || (Duel.Turn > 1 && Duel.Phase < DuelPhase.Main2)) return false;
+            if (enemyResolvedEffectIdList.Contains(_CardId.MulcharmyPurulia) && (loc & CardLocation.Hand) != 0) return true;
+            if (enemyResolvedEffectIdList.Contains(_CardId.MulcharmyFuwalos) && (loc & (CardLocation.Deck | CardLocation.Extra)) != 0) return true;
+            if (enemyResolvedEffectIdList.Contains(_CardId.MulcharmyNyalus) && (loc & (CardLocation.Grave | CardLocation.Removed)) != 0) return true;
 
             return false;
         }
@@ -461,7 +457,7 @@ namespace WindBot.Game.AI.Decks
 
             checkFlag |= !activatedCardIdList.Contains(CardId.RyzealDuodrive + 1) && Bot.HasInExtra(CardId.RyzealDuodrive)
                 && !DefaultCheckWhetherCardIdIsNegated(CardId.RyzealDuodrive) && !CheckWhetherNegated(true, true, CardType.Monster)
-                && summonCount > 0 && Bot.Hand.Count(c => c.Level == 4) > 0 && GetLevel4CountOnField() == 1 && !lockBirdSolved
+                && summonCount > 0 && Bot.Hand.Count(c => c.Level == 4) > 0 && GetLevel4CountOnField() == 1 && DefaultCheckWhetherBotCanSearch()
                 && !skipDuodriver;
 
             return checkFlag;
@@ -706,7 +702,7 @@ namespace WindBot.Game.AI.Decks
             if (Bot.HasInSpellZone(CardId.RyzealCross, true, true))
             {
                 // sending duodrive because not enough material on field
-                if (Bot.HasInExtra(CardId.RyzealDuodrive) && !activatedCardIdList.Contains(CardId.RyzealDuodrive + 1) && !lockBirdSolved)
+                if (Bot.HasInExtra(CardId.RyzealDuodrive) && !activatedCardIdList.Contains(CardId.RyzealDuodrive + 1) && DefaultCheckWhetherBotCanSearch())
                 {
                     bool checkOverlay = true;
                     ClientCard duoDrive = Bot.MonsterZone.FirstOrDefault(c => c != null && c.IsCode(CardId.RyzealDuodrive) && !resultList.Contains(c));
@@ -1574,11 +1570,6 @@ namespace WindBot.Game.AI.Decks
             }
 
             summonCount = maxSummonCount;
-            enemyActivateMaxxC = false;
-            enemyActivatePurulia = false;
-            enemyActivateFuwalos = false;
-            enemyActivateNyalus = false;
-            lockBirdSolved = false;
             if (dimensionShifterCount > 0) dimensionShifterCount--;
             enemyActivateInfiniteImpermanenceFromHand = false;
             botActivateMulcharmy = false;
@@ -1646,21 +1637,8 @@ namespace WindBot.Game.AI.Decks
             {
                 if (!Duel.IsCurrentSolvingChainNegated())
                 {
-                    if (currentChain.IsActivateCode(_CardId.LockBird))
-                        lockBirdSolved = true;
                     if (currentChain.IsActivateCode(_CardId.DimensionShifter))
                         dimensionShifterCount = 2;
-                    if (currentChain.ActivatePlayer == 1)
-                    {
-                        if (currentChain.IsActivateCode(_CardId.MaxxC))
-                            enemyActivateMaxxC = true;
-                        if (currentChain.IsActivateCode(_CardId.MulcharmyPurulia))
-                            enemyActivatePurulia = true;
-                        if (currentChain.IsActivateCode(_CardId.MulcharmyFuwalos))
-                            enemyActivateFuwalos = true;
-                        if (currentChain.IsActivateCode(_CardId.MulcharmyNyalus))
-                            enemyActivateNyalus = true;
-                    }
                     if (currentChain.ActivatePlayer == 0)
                     {
                         foreach (int checkId in CheckBotSolvedList)
@@ -1933,7 +1911,7 @@ namespace WindBot.Game.AI.Decks
             }
             bool spsummonFlag = lv4Count == 1;
             spsummonFlag |= !CheckWhetherNegated(true, true, CardType.Monster) && Bot.HasInDeck(CardId.IceRyzeal, CardId.ExRyzeal)
-                && !activatedCardIdList.Contains(CardId.ThodeRyzeal) && !lockBirdSolved;
+                && !activatedCardIdList.Contains(CardId.ThodeRyzeal) && DefaultCheckWhetherBotCanSearch();
             if (GetLevel4CountOnField() == 0)
             {
                 spsummonFlag |= GetLevel4FinalCountOnField(true, out _) >= 2 && !CheckWhetherHaveFinalMonster();
@@ -2077,7 +2055,7 @@ namespace WindBot.Game.AI.Decks
             }
             if (Duel.Turn == 1)
             {
-                bool checkFlag = !activatedCardIdList.Contains(CardId.ExRyzeal) && !lockBirdSolved && !DefaultCheckWhetherCardIdIsNegated(CardId.ExRyzeal) && !Bot.HasInMonstersZone(_CardId.Number41BagooskatheTerriblyTiredTapir);
+                bool checkFlag = !activatedCardIdList.Contains(CardId.ExRyzeal) && DefaultCheckWhetherBotCanSearch() && !DefaultCheckWhetherCardIdIsNegated(CardId.ExRyzeal) && !Bot.HasInMonstersZone(_CardId.Number41BagooskatheTerriblyTiredTapir);
                 checkFlag |= !Bot.MonsterZone.Any(c => c != null && c.IsFaceup() && c.HasType(CardType.Xyz)) && GetLevel4CountOnField() == 1;
                 if (checkFlag)
                 {
@@ -2198,7 +2176,7 @@ namespace WindBot.Game.AI.Decks
         public bool MulcharmyFuwalosActivate()
         {
             if (CheckWhetherNegated(true) || Duel.Player == 0) return false;
-            if (lockBirdSolved || Duel.CurrentChain.Any(c => c.IsCode(_CardId.LockBird))) return false;
+            if (!DefaultCheckWhetherBotCanDraw() || Duel.CurrentChain.Any(c => c.IsCode(_CardId.LockBird))) return false;
             if (Duel.Phase > DuelPhase.Main1) return false;
 
             botActivateMulcharmy = true;
@@ -2208,7 +2186,7 @@ namespace WindBot.Game.AI.Decks
         public bool MulcharmyPuruliaActivate()
         {
             if (CheckWhetherNegated(true) || Duel.Player == 0) return false;
-            if (lockBirdSolved || Duel.CurrentChain.Any(c => c.IsCode(_CardId.LockBird))) return false;
+            if (!DefaultCheckWhetherBotCanDraw() || Duel.CurrentChain.Any(c => c.IsCode(_CardId.LockBird))) return false;
             if (Duel.Phase > DuelPhase.Main1) return false;
             if (botActivateMulcharmy) return false;
 
@@ -2219,7 +2197,7 @@ namespace WindBot.Game.AI.Decks
         public bool MulcharmyNyalusActivate()
         {
             if (CheckWhetherNegated(true) || Duel.Player == 0) return false;
-            if (lockBirdSolved || Duel.CurrentChain.Any(c => c.IsCode(_CardId.LockBird))) return false;
+            if (!DefaultCheckWhetherBotCanDraw() || Duel.CurrentChain.Any(c => c.IsCode(_CardId.LockBird))) return false;
             if (Duel.Phase > DuelPhase.Main1) return false;
             if (botActivateMulcharmy) return false;
 
@@ -2250,7 +2228,7 @@ namespace WindBot.Game.AI.Decks
 
         public bool MaxxCActivate()
         {
-            if (CheckWhetherNegated(true) || Duel.LastChainPlayer == 0 || lockBirdSolved) return false;
+            if (CheckWhetherNegated(true) || Duel.LastChainPlayer == 0 || !DefaultCheckWhetherBotCanDraw()) return false;
             return DefaultMaxxC();
         }
 
@@ -2320,7 +2298,7 @@ namespace WindBot.Game.AI.Decks
                 if (res >= 0) return res;
             }
             // draw?
-            if (!lockBirdSolved)
+            if (DefaultCheckWhetherBotCanDraw())
             {
                 bool checkFlag = CheckCanContinueSummon();
                 if (!checkFlag)
@@ -3070,7 +3048,7 @@ namespace WindBot.Game.AI.Decks
             checkFlag &= !DefaultCheckWhetherCardIdIsNegated(CardId.RyzealDuodrive);
             checkFlag &= !activatedCardIdList.Contains(CardId.RyzealDuodrive + 1);
             checkFlag &= !CheckWhetherNegated(true, true, CardType.Monster);
-            checkFlag &= !lockBirdSolved;
+            checkFlag &= DefaultCheckWhetherBotCanSearch();
             checkFlag &= !CheckShouldNoMoreSpSummon(CardLocation.Extra);
 
             return checkFlag;
@@ -3134,7 +3112,7 @@ namespace WindBot.Game.AI.Decks
                 bool flag = hasNode;
                 flag &= Util.IsTurn1OrMain2();
                 flag &= Bot.HasInExtra(CardId.TwinsOfTheEclipse) && Bot.MonsterZone.Any(c => c != null && c.IsFaceup() && c.HasType(CardType.Xyz));
-                flag &= (GetNegateEffectCount() >= 2 || lockBirdSolved);
+                flag &= GetNegateEffectCount() >= 2 || !DefaultCheckWhetherBotCanDraw();
 
                 if (flag)
                 {
@@ -3182,7 +3160,7 @@ namespace WindBot.Game.AI.Decks
 
             // 60
             ClientCard no60 = Duel.MainPhase.SpecialSummonableCards.FirstOrDefault(c => c.IsCode(CardId.Number60DugaresTheTimeless));
-            if (no60 != null && !lockBirdSolved)
+            if (no60 != null && DefaultCheckWhetherBotCanDraw())
             {
                 bool flag = Bot.Deck.Count() > 2;
 
@@ -3881,7 +3859,7 @@ namespace WindBot.Game.AI.Decks
 
         public bool Number60DugaresTheTimelessDrawEffect()
         {
-            if (lockBirdSolved || Bot.Deck.Count < 2) return false;
+            if (!DefaultCheckWhetherBotCanDraw() || Bot.Deck.Count < 2) return false;
             activatedCardIdList.Add(CardId.Number60DugaresTheTimeless);
             return true;
         }
