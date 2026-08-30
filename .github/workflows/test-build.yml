@@ -47,7 +47,7 @@ jobs:
     - name: Upload Artifact
       uses: actions/upload-artifact@v7
       with:
-        name: windbot-release
+        name: windbot-dist
         path: dist
 
   mono-build:
@@ -67,7 +67,7 @@ jobs:
 
   release:
     needs: build
-#    if: startsWith(github.ref, 'refs/tags/')
+    if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -79,7 +79,7 @@ jobs:
     - name: Download Artifact
       uses: actions/download-artifact@v8
       with:
-        name: windbot-release
+        name: windbot-dist
         path: dist
 
     - name: GitHub Release
@@ -91,4 +91,4 @@ jobs:
         cd dist
         zip -r ../WindBot.zip .
         cd ..
-#       gh release create "$TAG_NAME" WindBot.tar.gz WindBot.zip --title "$TAG_NAME" --generate-notes
+        gh release create "$TAG_NAME" WindBot.tar.gz WindBot.zip --title "$TAG_NAME" --generate-notes
