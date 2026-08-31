@@ -11,6 +11,7 @@
     <RootNamespace>BotWrapper</RootNamespace>
     <AssemblyName>Bot</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <LangVersion>12</LangVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
