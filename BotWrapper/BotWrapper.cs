@@ -14,13 +14,16 @@ namespace BotWrapper
         public static extern int MessageBox(IntPtr hWnd, string lpText, string lpCaption, int uType);
 
         const int MB_ICONERROR = 0x00000010;
+        static readonly Random rand = new Random();
 
         static void Main(string[] args)
         {
-            ProcessStartInfo startInfo = new ProcessStartInfo();
-            startInfo.UseShellExecute = false;
-            startInfo.WorkingDirectory = Path.GetFullPath("WindBot");
-            startInfo.FileName = startInfo.WorkingDirectory + "\\WindBot.exe";
+            ProcessStartInfo startInfo = new ProcessStartInfo()
+            {
+                UseShellExecute = false,
+                WorkingDirectory = Path.GetFullPath("WindBot"),
+                FileName = Path.GetFullPath("WindBot\\WindBot.exe")
+            };
 
             if (args.Length == 3)
             {
@@ -40,11 +43,11 @@ namespace BotWrapper
                     }
                 }
                 arg = arg.Replace("'", "\"");
-                if (int.Parse(args[1]) == 1)
+                if (args[1] == "1")
                 {
                     arg += " Hand=1";
                 }
-                arg += " Port=" + args[2];
+                arg += $" Port={args[2]}";
                 startInfo.Arguments = arg;
             }
 
@@ -70,21 +73,20 @@ namespace BotWrapper
 
         static void ReadBots()
         {
-            using (StreamReader reader = new StreamReader("bot.conf"))
+            using StreamReader reader = new StreamReader("bot.conf");
+            while (!reader.EndOfStream)
             {
-                while (!reader.EndOfStream)
+                string line = reader.ReadLine().Trim();
+                if (line.Length > 0 && line[0] == '!')
                 {
-                    string line = reader.ReadLine().Trim();
-                    if (line.Length > 0 && line[0] == '!')
+                    BotInfo newBot = new BotInfo()
                     {
-                        BotInfo newBot = new BotInfo();
-                        newBot.name = line;
-                        newBot.command = reader.ReadLine().Trim();
-                        newBot.desc = reader.ReadLine().Trim();
-                        line = reader.ReadLine().Trim();
-                        newBot.flags = line.Split(' ');
-                        Bots.Add(newBot);
-                    }
+                        name = line,
+                        command = reader.ReadLine(),
+                        desc = reader.ReadLine().Trim(),
+                        flags = reader.ReadLine().Trim().Split(' ')
+                    };
+                    Bots.Add(newBot);
                 }
             }
         }
@@ -94,7 +96,6 @@ namespace BotWrapper
             IList<BotInfo> foundBots = Bots.Where(bot => bot.flags.Contains(flag)).ToList();
             if (foundBots.Count > 0)
             {
-                Random rand = new Random();
                 BotInfo bot = foundBots[rand.Next(foundBots.Count)];
                 return bot.command;
             }
