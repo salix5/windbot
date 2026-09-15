@@ -94,7 +94,7 @@ jobs:
       run: msbuild "$Solution_Name" /restore /t:Build /p:Configuration=Release /p:Platform=x64
 
     - name: Upload Mono build artifacts
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: WindBot-mono
         path: bin/Release/
