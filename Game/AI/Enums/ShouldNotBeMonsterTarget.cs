@@ -20,6 +20,7 @@ namespace WindBot.Game.AI.Enums
         VeidosTheDragonOfEndlessDarkness = 8540986,
         FirstOfTheDragonlords = 53466722,
         JunkWarriorAssaultMode = 23219323,
-        VidoliumTheUnstablePowerPatronOfUnity = 70488851
+        VidoliumTheUnstablePowerPatronOfUnity = 70488851,
+        RedEyesBlackDragonExceed = 17242022
     }
 }
