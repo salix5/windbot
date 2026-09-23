@@ -2966,7 +2966,7 @@ namespace WindBot.Game.AI.Decks
         public bool GreenFieldDeckHasSsForCost(ClientCard cost)
         {
             if (cost == null || cost.Data == null) return false;
-            int costAttr = cost.Data.Attribute;
+            var costAttr = cost.Data.Attribute;
             int[] ids = new int[]
             {
                 CardId.ElvenotesWind, CardId.JailChicken, CardId.ElvenotesYellow, CardId.ElvenotesBlue, CardId.ElvenotesRed
