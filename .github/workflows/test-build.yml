@@ -18,7 +18,7 @@ jobs:
   build:
     runs-on: windows-2022
     permissions:
-      contents: write
+      contents: read
 
     env:
       Solution_Name: WindBot.sln
@@ -80,6 +80,8 @@ jobs:
 
   mono-build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     container:
       image: mono:6.8.0.123
 
