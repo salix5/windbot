@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("IceYGO")]
 [assembly: AssemblyProduct("WindBot")]
-[assembly: AssemblyCopyright("Copyright © IceYGO 2015-2025")]
+[assembly: AssemblyCopyright("Copyright © IceYGO 2015-2026")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -33,4 +33,4 @@ using System.Runtime.InteropServices;
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.10.2.0")]
+[assembly: AssemblyFileVersion("1.12.0.0")]
